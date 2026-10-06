@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+from pipeline.configuracao_series_banco_central import CODIGOS_SERIES_BANCO_CENTRAL
 
 URL_BASE_API_BANCO_CENTRAL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo_serie}/dados"
 
@@ -16,3 +17,14 @@ def baixar_serie_banco_central(codigo_serie: int) -> pd.DataFrame:
     tabela_da_serie["valor"] = pd.to_numeric(tabela_da_serie["valor"])
     tabela_da_serie["codigo_serie"] = codigo_serie
     return tabela_da_serie
+
+def baixar_todas_as_series_banco_central() -> pd.DataFrame:
+    """Baixa todas as séries da configuração e junta em uma tabela só."""
+    tabelas_das_series = []
+
+    for nome_serie, codigo_serie in CODIGOS_SERIES_BANCO_CENTRAL.items():
+        tabela_da_serie = baixar_serie_banco_central(codigo_serie)
+        tabela_da_serie["nome_serie"] = nome_serie
+        tabelas_das_series.append(tabela_da_serie)
+
+    return pd.concat(tabelas_das_series, ignore_index=True)
